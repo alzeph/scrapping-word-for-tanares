@@ -79,3 +79,26 @@ def extract_first_text_after_number(texts: list[str], number: str) -> str:
             # retirer le nombre et les espaces qui suivent
             return re.sub(rf'^{re.escape(number)}\s*', '', text)
     return ''
+
+def clean_paragraph(texte: str) -> str:
+    if not texte:
+        return ""
+    return " ".join(
+        texte.replace('"', '').split()
+    )
+
+def clean_texte_special(texte: str) -> str:
+    if not texte:
+        return ""
+
+    # Supprimer les espaces autour des tirets
+    texte = re.sub(r'\s*-\s*', '-', texte)
+
+    # Supprimer les espaces à l’intérieur des nombres
+    texte = re.sub(r'(\d)\s+(\d)', r'\1\2', texte)
+
+    # Supprimer les espaces multiples restants
+    texte = re.sub(r'\s+', ' ', texte)
+
+    # Supprimer les espaces en début et fin
+    return texte.strip()
