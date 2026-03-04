@@ -9,7 +9,7 @@ from tools.cleans import (
 from pathlib import Path
 import csv
 
-Unity = Literal["GHz", "MHz", "kHz"]
+Unity = Literal["GHz", "MHz", "KHz"]
 BASE_PATH = Path(__file__).resolve().parent.parent
 
 
@@ -44,12 +44,12 @@ class ExtractData:
         """
         
         lines = []
-        for i_row in range(2, len(table.rows)):
+        for i_row in range(0, len(table.rows)):
             row = table.rows[i_row]
-            if len(row.cells) == 5:
+            if True:
                 cells = row.cells
-                bande = f"{clean_texte_special(cells[2].text)} {self.unity}"
-                services = [p.text for p in cells[3].paragraphs if p.text != " " and  not starts_with_number_like(p.text)]
+                bande = f"{clean_texte_special(cells[2].text)}-{self.unity}"
+                services = [p.text for p in cells[3].paragraphs if p.text != " " and not starts_with_number_like(p.text) and p != "SERVICES" and p != "COTE D’IVOIRE"]
                 renvoie_specifique = {p: [r for r in extract_from_first_digit(p) if r] for p in services}
                 text_renvoie_specifique = {rs: extract_first_text_after_number(self.paragraphs, rs) for _rs in renvoie_specifique.values() for rs in _rs}
                 renvoie_global = [p for p in cells[3].paragraphs[-1].text.split(" ") if p] if starts_with_number_like(cells[3].paragraphs[-1].text) else []
@@ -57,9 +57,10 @@ class ExtractData:
                 observation = cells[4].text
 
                 for service in services:
-                    greaters_lines = max(len(renvoie_specifique[service]), len(renvoie_global))
+                    greaters_lines = max(1, len(renvoie_specifique[service]), len(renvoie_global))
                     for i in range(greaters_lines):
                         lines.append([
+                            self.unity,
                             clean_paragraph(bande),
                             clean_paragraph(remove_from_first_digit(service)),
                             clean_paragraph(renvoie_specifique[service][i]) if i < len(renvoie_specifique[service]) else "",
@@ -68,14 +69,13 @@ class ExtractData:
                             clean_paragraph(text_renvoie_global[renvoie_global[i]]) if i < len(renvoie_global) else "",
                             clean_paragraph(observation)
                         ])
-
         return lines
 
     def extract_data(self):
         data = [
-             ["bandes", "services", "renvoie_specifique", "text_renvoie_specifique", "renvoie_global", "text_renvoie_global", "observation"]
+             ["unity", "bandes", "services", "renvoie_specifique", "text_renvoie_specifique", "renvoie_global", "text_renvoie_global", "observation"]
         ]
-        for table in self.tables:
+        for i, table in enumerate(self.tables):
             data.extend(self._extract_data_from_table(table))
         return data
 
@@ -84,5 +84,15 @@ class ExtractData:
         with open(path_file, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(self.extract_data())
-
+            
+    
+    def test(self):
+        self._extract_data_from_table(self.tables[28])
+        for i_row in range(0, len(self.tables[28].rows)):
+            row = self.tables[28].rows[i_row]
+            cells = row.cells
+            services = [p.text for p in cells[3].paragraphs if p.text != " " and  not starts_with_number_like(p.text)]
+            renvoie_specifique = {p: [r for r in extract_from_first_digit(p) if r] for p in services}
+            print(f"{clean_texte_special(cells[2].text)} {self.unity} : {services} : {renvoie_specifique}")
+            
 
