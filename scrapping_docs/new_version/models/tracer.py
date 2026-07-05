@@ -32,7 +32,7 @@ class BandeTracer:
     # Marge uniforme (en pouces) ajoutée autour de tout le contenu rendu
     # (bandes, en-têtes, légendes) lors de l'export : garantit un espace
     # constant par rapport au bord et centre le tracé sur la page.
-    MARGIN_INCHES = 6.0
+    MARGIN_INCHES = 2.0
 
     # Résolution (dpi) utilisée pour l'export final : sert de référence pour
     # convertir la taille voulue de la colonne de logos (en pixels) en pouces.
