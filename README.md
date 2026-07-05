@@ -27,7 +27,7 @@ services.
 
 ```bash
 # Clone du dépôt
-git clone <url-du-depot>
+git clone https://github.com/alzeph/scrapping-word-for-tanares.git
 cd scrapping-word-for-tanares
 
 # Installe les dépendances dans .venv et construit le paquet du projet
