@@ -8,3 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+
+# macOS
+.DS_Store
+
+# Artefacts générés par le pipeline (régénérables via main.py)
+tanares.png
+scrapping_docs/new_version/output/
