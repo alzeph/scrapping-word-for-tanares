@@ -2,6 +2,8 @@ import argparse
 from pathlib import Path
 
 from scrapping_docs.new_version.models.band_repository import BandRepository
+from scrapping_docs.new_version.models.db_repository import DbBandRepository
+from scrapping_docs.new_version.models.services import PALETTES
 from scrapping_docs.new_version.models.extract_data import ExtractData
 from scrapping_docs.new_version.models.frequency import FrequencyInterval
 from scrapping_docs.new_version.models.tracer import BandeTracer
@@ -49,6 +51,26 @@ def parse_args():
         ),
     )
     parser.add_argument(
+        "--db-csv",
+        help=(
+            "CSV exporté depuis la base TANARES (une ligne par allocation). "
+            "Remplace la lecture des .docx et active les lignes d'affectataires."
+        ),
+    )
+    parser.add_argument(
+        "--palette",
+        choices=PALETTES,
+        default="anfr",
+        help=(
+            "Couleurs des bandes : 'anfr' = 12 familles de services (défaut), "
+            "'services' = couleur propre de chaque service (base uniquement)"
+        ),
+    )
+    parser.add_argument(
+        "--logos-dir",
+        help="Dossier des logos d'affectataires (noms de fichiers de la colonne assignee_logo)",
+    )
+    parser.add_argument(
         "--skip-extract",
         action="store_true",
         help=(
@@ -86,20 +108,32 @@ def main():
         interval = FrequencyInterval.from_texts(args.min, args.max)
         print(f"Intervalle demandé : [{interval.start_ghz:g} ; {interval.end_ghz:g}] GHz")
 
-    if args.skip_extract:
-        csv_paths = {
-            unity: str(OUTPUT_DIR / f"{unity}.csv") for unity in SOURCE_DOCX
-        }
+    assignees = None
+    if args.db_csv:
+        db_repository = DbBandRepository(args.db_csv)
+        records = list(db_repository.iter_bands(interval))
+        assignees = db_repository.assignees()
     else:
-        csv_paths = extract_all()
+        if args.palette == "services":
+            print("La palette 'services' nécessite --db-csv : palette 'anfr' utilisée.")
+            args.palette = "anfr"
+        if args.skip_extract:
+            csv_paths = {
+                unity: str(OUTPUT_DIR / f"{unity}.csv") for unity in SOURCE_DOCX
+            }
+        else:
+            csv_paths = extract_all()
+        records = list(BandRepository(csv_paths=csv_paths).iter_bands(interval))
 
-    repository = BandRepository(csv_paths=csv_paths)
-
-    records = list(repository.iter_bands(interval))
     print(f"{len(records)} bandes à tracer")
 
     tracer = BandeTracer(
-        records, interval=interval, vertical_margin_inches=args.vertical_margin
+        records,
+        interval=interval,
+        vertical_margin_inches=args.vertical_margin,
+        palette=args.palette,
+        assignees=assignees,
+        logos_dir=args.logos_dir,
     )
     tracer.save(args.output)
 

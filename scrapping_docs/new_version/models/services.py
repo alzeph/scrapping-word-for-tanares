@@ -58,3 +58,40 @@ def get_group_services(services: list[str]) -> dict[str, str]:
             group_services["autres"] = GROUP_COLOR_SERVICE["autres"]
 
     return group_services
+
+
+# ----------------------------------------------------------------------
+# Palettes de rendu
+# ----------------------------------------------------------------------
+
+# Bande « Non attribuée » : gris clair plutôt que le noir de « autres »,
+# pour qu'une grande zone non attribuée (ex. 275-3000 GHz) ne domine pas.
+NOT_ALLOCATED_LABEL = "Non attribuée"
+NOT_ALLOCATED_COLOR = "#D9D9D9"
+
+PALETTES = ("anfr", "services")
+
+
+def _is_not_allocated(service: str) -> bool:
+    return "NON ATTRIBUE" in normalize(service)
+
+
+def colors_for_band(
+    services: list[str],
+    palette: str,
+    service_colors: tuple[tuple[str, str], ...] = (),
+) -> dict[str, str]:
+    """
+    Couleurs des sous-barres d'une bande, {libellé: couleur}.
+    - 'anfr'     : 12 familles de services (couleurs ANFR de Cédric).
+    - 'services' : une couleur par service, celle de la base (color_code).
+    """
+    allocated = [s for s in services if not _is_not_allocated(s)]
+    if not allocated:
+        return {NOT_ALLOCATED_LABEL: NOT_ALLOCATED_COLOR}
+
+    if palette == "services" and service_colors:
+        own = dict(service_colors)
+        return {s: own.get(s, GROUP_COLOR_SERVICE["autres"]) for s in allocated}
+
+    return get_group_services(allocated)

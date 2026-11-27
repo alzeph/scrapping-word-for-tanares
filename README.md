@@ -72,6 +72,9 @@ uv run python -m scrapping_docs.new_version.main [options]
 | `--max`              | texte  | *(aucune)*     | Borne haute de l'intervalle à tracer, ex. `1000000KHz`, `3GHz`. Sans borne, l'intervalle est ouvert vers le haut. |
 | `--output`           | chemin | `tanares.png`  | Chemin du fichier image de sortie. |
 | `--vertical-margin`  | float  | `6` (pouces)   | Marge verticale ajoutée en haut/bas de l'image exportée. Sans valeur, la marge par défaut historique est conservée. |
+| `--db-csv`           | chemin | *(aucune)*     | CSV exporté depuis la base TANARES (une ligne par allocation : `freq_start`, `freq_end`, `unit`, `service_name`, `service_color`, `assignee_code`, `assignee_name`, `assignee_logo`, …). Remplace la lecture des `.docx` et active les lignes d'affectataires. |
+| `--palette`          | texte  | `anfr`         | `anfr` : 12 familles de services (couleurs ANFR). `services` : couleur propre de chaque service, issue de la base (nécessite `--db-csv`). |
+| `--logos-dir`        | chemin | *(aucune)*     | Dossier des logos d'affectataires (noms de fichiers de la colonne `assignee_logo`). Sans logo, seul le code de l'affectataire est affiché. |
 | `--skip-extract`     | flag   | désactivé      | Ne relit pas les `.docx` sources : réutilise les CSV déjà présents dans `scrapping_docs/new_version/output/`. Utile pour itérer rapidement sur le rendu sans relancer l'extraction. |
 
 ### Exemples
@@ -94,6 +97,15 @@ Régénérer uniquement l'extraction puis le rendu avec un nom de fichier dédi�
 ```bash
 uv run tanares --output tanares-2026.png
 ```
+
+Depuis la base TANARES (lignes d'affectataires + logos), en PDF vectoriel :
+
+```bash
+uv run tanares --db-csv allocations.csv --palette anfr \
+  --logos-dir /chemin/vers/assignees-logos --output tanares.pdf
+```
+
+Le format de sortie suit l'extension de `--output` (`.png`, `.pdf`, `.svg`).
 
 ## Structure du projet
 

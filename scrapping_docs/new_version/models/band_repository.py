@@ -24,6 +24,10 @@ class BandRecord:
     end_ghz: float
     services: list[str]
     unity: Unity
+    # Source « base » uniquement : couleur propre de chaque service
+    # ((nom, couleur), ...) et codes des affectataires de la bande.
+    service_colors: tuple[tuple[str, str], ...] = ()
+    assignees: tuple[str, ...] = ()
 
 
 class BandRepository:
