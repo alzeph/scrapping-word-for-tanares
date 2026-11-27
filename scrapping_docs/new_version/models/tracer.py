@@ -94,7 +94,10 @@ class BandeTracer:
         self.y_bar = self.assignee_top + 1
         self.label_index = 0
         self.last_label_x = -float("inf")
-        self.fig, self.ax = plt.subplots(figsize=(157.5, 78.7), dpi=200)
+        # dpi de travail bas : la mise en page est en pouces/points, la
+        # résolution finale est fixée par SAVE_DPI à l'export. 200 dpi ici
+        # faisait monter le rendu à ~2,2 Go de mémoire.
+        self.fig, self.ax = plt.subplots(figsize=(157.5, 78.7), dpi=72)
         # Marge verticale (en pouces) : si non fournie, on garde la valeur
         # par défaut historique (MARGIN_INCHES).
         self.vertical_margin_inches = (
